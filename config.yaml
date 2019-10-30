@@ -1,0 +1,11 @@
+input:
+    dataPath: 'data/'
+    trainFile: 'train.tif'
+    testFile: 'test.tif'
+    truthFile: 'train_ground_truth.shp'
+output:
+  plotdir: 'plotField/'
+  MLplotdir: 'plotML/'
+misc:
+  saveFig: True
+  verbose: False
