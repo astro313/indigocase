@@ -4,11 +4,7 @@
 
 """
 
-import matplotlib
-new_style = {'grid': False}
-matplotlib.rc('axes', **new_style)
-
-
+from sklearn.preprocessing import MinMaxScaler
 import numpy as np
 import pandas as pd
 from rasterio.plot import show
@@ -96,7 +92,6 @@ class CreateDFsML(object):
         X_train['ndvi'] = ndvi[~badii].flatten()
         cnames = X_train.columns.values
 
-        from sklearn.preprocessing import MinMaxScaler
         scaler = MinMaxScaler()
         X_train = scaler.fit_transform(X_train)
         self.X_train = pd.DataFrame(X_train, columns=cnames)
@@ -134,6 +129,7 @@ class CreateDFsML(object):
         cnames = XXX.columns.values
 
         # generate X for the test field
+        scaler = MinMaxScaler()
         XXX = scaler.fit_transform(XXX)
         self.XXX = pd.DataFrame(XXX, columns=cnames)
 

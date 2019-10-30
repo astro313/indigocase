@@ -14,7 +14,7 @@ def compute_tif_summaryStats(data):
     """
 
     # read all bands
-    array = self.data.read()
+    array = data.read()
 
     stats = []
     for band in array:

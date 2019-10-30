@@ -117,7 +117,9 @@ def plot_field_all_bands_hist(data, savefig, plotdir, tag=''):
         e.g., 'train' or 'test'
 
     """
+
     plt.figure()
+    data = data.read()
     plt.hist(data.flatten(), bins=50, lw=0.0, stacked=False, alpha=0.3,
             histtype='stepfilled')
     plt.title(tag)

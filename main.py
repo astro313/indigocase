@@ -1,6 +1,7 @@
 import matplotlib
 new_style = {'grid': False}
 matplotlib.rc('axes', **new_style)
+matplotlib.use('Agg')
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -8,7 +9,7 @@ import pandas as pd
 import geopandas as gpd
 import rasterio
 from shapely.geometry import shape
-from osgeo import gdal, osr
+# from osgeo import gdal, osr
 
 import os, sys
 import config
@@ -33,8 +34,8 @@ def run(fname):
     plot_false_RGB(bu.train_img1, bu.train_img2, bu.train_img3, savedir=bu.plotdir, tag='train', savefig=bu.saveFig)
     plot_false_RGB(bu.test_img1, bu.test_img2, bu.test_img3, savedir=bu.plotdir, tag='test', savefig=bu.saveFig)
 
-    plot_field_all_bands_hist(bu.TrainALLbands, bu.saveFig, bu.plotdir, tag='train')
-    plot_field_all_bands_hist(bu.TestALLbands, bu.saveFig, bu.plotdir, tag='test')
+    plot_field_all_bands_hist(bu.datasetTrain, bu.saveFig, bu.plotdir, tag='train')
+    plot_field_all_bands_hist(bu.datasetTest, bu.saveFig, bu.plotdir, tag='test')
 
     plot_truthPoints(bu.truth, bu.saveFig, bu.plotdir)
     overplot_truthPoints_trainField(bu.datasetTrain, bu.truth, bu.saveFig, \
@@ -49,7 +50,7 @@ def run(fname):
     bbb.build_DF_testField(bu.test_img1, bu.test_img2, bu.test_img3, bu.test_img4, bu.verbose)
     del bu
 
-    ML pipeline
+    # ML pipeline
     ## 0 and 1, so start w/ logistic
     logreg = LogisticRegression(penalty='l2', class_weight='balanced')
     logreg.fit(bbb.X_train_small, bbb.y_train_small)

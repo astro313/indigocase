@@ -8,7 +8,7 @@ import pandas as pd
 import geopandas as gpd
 import rasterio
 from shapely.geometry import shape
-from osgeo import gdal, osr
+# from osgeo import gdal, osr
 import os
 
 
