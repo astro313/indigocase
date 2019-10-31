@@ -35,12 +35,8 @@ def run(fname):
     # visualize
 
     # include NIR
-    train_RGB = plot_false_RGB(bu.train_img1, bu.train_img3, bu.train_img4,savedir=bu.plotdir, tag='train', savefig=bu.saveFig)
-    _ = plot_false_RGB(bu.test_img1, bu.test_img3, bu.test_img4, savedir=bu.plotdir, tag='test', savefig=bu.saveFig)
-
-    train_hsv_img = rgb2hsv(train_RGB, savedir=bu.plotdir, tag='train',
-                           plothist=True, saveFig=bu.saveFig)
-    import sys; sys.exit()
+    plot_false_RGB(bu.train_img1, bu.train_img3, bu.train_img4,savedir=bu.plotdir, tag='train', savefig=bu.saveFig)
+    plot_false_RGB(bu.test_img1, bu.test_img3, bu.test_img4, savedir=bu.plotdir, tag='test', savefig=bu.saveFig)
 
     plot_field_all_bands_hist(bu.datasetTrain, bu.saveFig, bu.plotdir, tag='train')
     plot_field_all_bands_hist(bu.datasetTest, bu.saveFig, bu.plotdir, tag='test')
@@ -55,13 +51,17 @@ def run(fname):
     bbb.saveFig = bu.saveFig
 
     # train also on RGB image, and Hue, and Value images
+    from split_fields_to_DF import create_rgb
+    train_RGB = create_rgb(bu.train_img1, bu.train_img3, bu.train_img4)
+    train_hsv_img = rgb2hsv(train_RGB, savedir=bu.plotdir, tag='train',
+                           plothist=True, saveFig=bu.saveFig)
+    del train_RGB
     bbb.build_DF_trainField(bu.train_img1, bu.train_img2,
                             bu.train_img3, bu.train_img4,
                             bu.truthfile, bu.datasetTrain,
-                            train_RGB=train_RGB,
                             train_hsv_img=train_hsv_img,
                             verbose=bu.verbose)
-    del train_RGB, train_hsv_img
+    del train_hsv_img
 
     bbb.split_data_for_ML()
     bbb.build_DF_testField(bu.test_img1, bu.test_img2,
@@ -180,8 +180,11 @@ def run(fname):
 
 if __name__ == "__main__":
 
-    # fname = 'config.yaml'
-    fname = sys.argv[1]
+    try:
+        fname = sys.argv[1]
+    except:
+        fname = 'config.yaml'
+
     run(fname)
 
 
