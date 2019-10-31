@@ -90,6 +90,12 @@ if __name__ == '__main__':
     from utils import get_raster_extents_from_tif, dist_btw_pair_latlon
     from osgeo import gdal
 
+    try:
+        fname = sys.argv[1]
+    except:
+        fname = 'config.yaml'
+
+
     bu = Parser(fname)
     bbb = CreateDFsML()
     plant_bool = bbb.bool_mask_truth(bu.datasetTrain, bu.truthfile)
