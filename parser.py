@@ -44,17 +44,21 @@ class Parser(object):
         if not os.path.exists(self.MLplotdir):
             os.makedirs(self.MLplotdir)
 
+        self.logreg = setupParam['ML']['logreg']
+        self.SVM = setupParam['ML']['SVM']
+        self.RFC = setupParam['ML']['RFC']
+
         self.saveFig = setupParam['misc']['saveFig']
         self.verbose = setupParam['misc']['verbose']
-        self.trainhue = setupParam['misc']['trainhue']
 
-        self.trainndvi = setupParam['misc']['trainndvi']
-        self.trainendvi = setupParam['misc']['trainendvi']
-        self.traincvi = setupParam['misc']['traincvi']
-        self.trainng = setupParam['misc']['trainng']
-        self.trainnnir = setupParam['misc']['trainnnir']
-        self.trainnr = setupParam['misc']['trainnr']
-        self.traintvi = setupParam['misc']['traintvi']
+        self.trainhue = setupParam['ML']['trainhue']
+        self.trainndvi = setupParam['ML']['trainndvi']
+        self.trainendvi = setupParam['ML']['trainendvi']
+        self.traincvi = setupParam['ML']['traincvi']
+        self.trainng = setupParam['ML']['trainng']
+        self.trainnnir = setupParam['ML']['trainnnir']
+        self.trainnr = setupParam['ML']['trainnr']
+        self.traintvi = setupParam['ML']['traintvi']
 
 
     def read_train_data(self):
