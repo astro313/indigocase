@@ -48,6 +48,14 @@ class Parser(object):
         self.verbose = setupParam['misc']['verbose']
         self.trainhue = setupParam['misc']['trainhue']
 
+        self.trainndvi = setupParam['misc']['trainndvi']
+        self.trainendvi = setupParam['misc']['trainendvi']
+        self.traincvi = setupParam['misc']['traincvi']
+        self.trainng = setupParam['misc']['trainng']
+        self.trainnnir = setupParam['misc']['trainnnir']
+        self.trainnr = setupParam['misc']['trainnr']
+        self.traintvi = setupParam['misc']['traintvi']
+
 
     def read_train_data(self):
         self.datasetTrain = rasterio.open(self.trainfile)
