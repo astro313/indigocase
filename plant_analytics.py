@@ -97,7 +97,7 @@ if __name__ == '__main__':
 
 
     bu = Parser(fname)
-    bbb = CreateDFsML()
+    bbb = CreateDFsML(test_size=0.5)
     plant_bool = bbb.bool_mask_truth(bu.datasetTrain, bu.truthfile)
 
     ds = gdal.Open(bu.trainfile)
