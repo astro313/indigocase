@@ -72,6 +72,7 @@ def plot_false_RGB(im1, im2, im3, savedir, gamma=0.5, perlow=5, perhigh=98, tag=
     else:
         plt.show()
     plt.close()
+    return false_RGB
 
 
 def plot_field(data, savefig, plotdir, tag='train'):
