@@ -17,10 +17,12 @@ import yaml
 from parser import Parser
 from utils import compute_tif_summaryStats
 from visutil import plot_false_RGB, plot_field_all_bands_hist, plot_truthPoints, overplot_truthPoints_trainField
-from split_fields_to_DF import CreateDFsML
+from split_fields_to_DF import CreateDFsML, rgb2hsv
 
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
+
+from MLutils import scores, GridSearch_logreg, ROC, confusion_scores, GridSearch_SVMpoly, GridSearch_RFC
 
 
 def run(fname):
@@ -31,8 +33,14 @@ def run(fname):
 
     # make overlay plot and save to plotField/
     # visualize
-    plot_false_RGB(bu.train_img1, bu.train_img2, bu.train_img3, savedir=bu.plotdir, tag='train', savefig=bu.saveFig)
-    plot_false_RGB(bu.test_img1, bu.test_img2, bu.test_img3, savedir=bu.plotdir, tag='test', savefig=bu.saveFig)
+
+    # include NIR
+    train_RGB = plot_false_RGB(bu.train_img1, bu.train_img3, bu.train_img4,savedir=bu.plotdir, tag='train', savefig=bu.saveFig)
+    _ = plot_false_RGB(bu.test_img1, bu.test_img3, bu.test_img4, savedir=bu.plotdir, tag='test', savefig=bu.saveFig)
+
+    train_hsv_img = rgb2hsv(train_RGB, savedir=bu.plotdir, tag='train',
+                           plothist=True, saveFig=bu.saveFig)
+    import sys; sys.exit()
 
     plot_field_all_bands_hist(bu.datasetTrain, bu.saveFig, bu.plotdir, tag='train')
     plot_field_all_bands_hist(bu.datasetTest, bu.saveFig, bu.plotdir, tag='test')
@@ -45,9 +53,20 @@ def run(fname):
     bbb = CreateDFsML(test_size=0.3)
     bbb.outdir = bu.MLplotdir
     bbb.saveFig = bu.saveFig
-    bbb.build_DF_trainField(bu.train_img1, bu.train_img2, bu.train_img3, bu.train_img4, bu.truthfile, bu.datasetTrain, bu.verbose)
+
+    # train also on RGB image, and Hue, and Value images
+    bbb.build_DF_trainField(bu.train_img1, bu.train_img2,
+                            bu.train_img3, bu.train_img4,
+                            bu.truthfile, bu.datasetTrain,
+                            train_RGB=train_RGB,
+                            train_hsv_img=train_hsv_img,
+                            verbose=bu.verbose)
+    del train_RGB, train_hsv_img
+
     bbb.split_data_for_ML()
-    bbb.build_DF_testField(bu.test_img1, bu.test_img2, bu.test_img3, bu.test_img4, bu.verbose)
+    bbb.build_DF_testField(bu.test_img1, bu.test_img2,
+                           bu.test_img3, bu.test_img4,
+                           bu.verbose)
     del bu
 
     # ML pipeline
@@ -55,9 +74,11 @@ def run(fname):
     logreg = LogisticRegression(penalty='l2', class_weight='balanced')
     logreg.fit(bbb.X_train_small, bbb.y_train_small)
     scores(logreg, 'Logistic Regression', bbb.X_train_small, bbb.y_train_small, bbb.X_test_small, bbb.y_test_small)
+    confusion_scores(logreg, bbb.X_test_small, bbb.y_test_small, 'logreg', bbb.outdir, saveFig=bbb.saveFig)
+    ROC(logreg, 'LogisticRegression', bbb.X_test_small, bbb.y_test_small,
+        bbb.outdir, '', bbb.saveFig)
 
     # hyperparameter Tuning
-    from MLutils import GridSearch_logreg
     gsc, grid_result = GridSearch_logreg(bbb.X_train_small, bbb.y_train_small
         )
     # apply
@@ -65,14 +86,95 @@ def run(fname):
     logreg_tuned.fit(bbb.X_train_small, bbb.y_train_small)
     scores(logreg_tuned, 'Logistic Regression, Tuned', bbb.X_train_small, bbb.y_train_small, bbb.X_test_small, bbb.y_test_small)
     confusion_scores(logreg_tuned, bbb.X_test_small, bbb.y_test_small, 'logregtuned', bbb.outdir, saveFig=bbb.saveFig)
+    ROC(logreg_tuned, 'LogisticRegressionTuned', bbb.X_test_small, bbb.y_test_small, bbb.outdir, '', bbb.saveFig)
 
     # run model on the test field
-    clf = logreg       # logreg_tuned
-    yyy_predict_logreg = clf.predict(bbb.XXX)
+    yyy_predict_logreg = logreg_tuned.predict(bbb.XXX)
     print("number of plants in test field: ", yyy_predict_logreg.sum())
     print("{:.2f}% of field", (yyy_predict_logreg.sum()/len(yyy_predict_logreg))*100)
-    ROC('LogisticRegressionTuned', bbb.X_test_small, bbb.y_test_small,
-        bbb.outdir, bbb.saveFig)
+
+
+    # SVM
+    from sklearn.svm import SVC
+
+    SVM = SVC(kernel='linear', class_weight='balanced')
+    SVM.fit(bbb.X_train_small, bbb.y_train_small)
+    scores(SVM, 'SVM linear', bbb.X_train_small, bbb.y_train_small, bbb.X_test_small, bbb.y_test_small)
+    confusion_scores(SVM, bbb.X_test_small, bbb.y_test_small, 'SVM linear', bbb.outdir, saveFig=bbb.saveFig)
+
+    # SVM poly
+    SVM = SVC(kernel='poly', class_weight='balanced')
+    SVM.fit(bbb.X_train_small, bbb.y_train_small)
+    scores(SVM, 'SVM poly', bbb.X_train_small, bbb.y_train_small, bbb.X_test_small, bbb.y_test_small)
+    confusion_scores(SVM, bbb.X_test_small, bbb.y_test_small, 'SVM poly', bbb.outdir, saveFig=bbb.saveFig)
+
+    # hypertuning for poly
+    gsc, grid_result =  GridSearch_SVMpoly(bbb.X_train_small, bbb.y_train_small
+        )
+    # apply
+    SVMpoly_tuned = SVC(kernel='poly', class_weight='balanced', **grid_result.best_params_)
+    SVMpoly_tuned.fit(bbb.X_train_small, bbb.y_train_small)
+    scores(SVMpoly_tuned, 'SVM poly, Tuned', bbb.X_train_small, bbb.y_train_small, bbb.X_test_small, bbb.y_test_small)
+    confusion_scores(SVMpoly_tuned, bbb.X_test_small, bbb.y_test_small, 'SVMpolytuned', bbb.outdir, saveFig=bbb.saveFig)
+    ROC(SVMpoly_tuned, 'SVMpolyTuned', bbb.X_test_small, bbb.y_test_small,
+        bbb.outdir, '', bbb.saveFig)
+
+    # run model on the test field
+    yyy_predict_poly = SVMpoly_tuned.predict(bbb.XXX)
+    print("number of plants in test field: ", yyy_predict_poly.sum())
+    print("{:.2f}% of field", (yyy_predict_poly.sum()/len(yyy_predict_poly))*100)
+
+
+    # SVM rbf
+    SVM = SVC(kernel='rbf', class_weight='balanced')
+    SVM.fit(bbb.X_train_small, bbb.y_train_small)
+    scores(SVM, 'SVM rbf', bbb.X_train_small, bbb.y_train_small, bbb.X_test_small, bbb.y_test_small)
+    confusion_scores(SVM, bbb.X_test_small, bbb.y_test_small, 'SVM rbf', bbb.outdir, saveFig=bbb.saveFig)
+
+    # hypertuning for rbf
+    gsc, grid_result =  GridSearch_SVMrbf(bbb.X_train_small, bbb.y_train_small
+        )
+    # apply
+    SVMrbf_tuned = SVC(kernel='rbf', class_weight='balanced', **grid_result.best_params_)
+    SVMrbf_tuned.fit(bbb.X_train_small, bbb.y_train_small)
+    scores(SVMrbf_tuned, 'SVM rbf, Tuned', bbb.X_train_small, bbb.y_train_small, bbb.X_test_small, bbb.y_test_small)
+    confusion_scores(SVMrbf_tuned, bbb.X_test_small, bbb.y_test_small, 'SVMrbftuned', bbb.outdir, saveFig=bbb.saveFig)
+    ROC(SVMrbf_tuned, 'SVMrbfTuned', bbb.X_test_small, bbb.y_test_small,
+        bbb.outdir, '', bbb.saveFig)
+
+    # run model on the test field
+    yyy_predict_rbf = SVMrbf_tuned.predict(bbb.XXX)
+    print("number of plants in test field: ", yyy_predict_rbf.sum())
+    print("{:.2f}% of field", (yyy_predict_rbf.sum()/len(yyy_predict_rbf))*100)
+
+
+    ### RFC
+    rfc = RandomForestClassifier(class_weight='balanced')
+    rfc.fit(X_train_small,y_train_small)
+
+    # Look at parameters used by our current forest
+    from pprint import pprint
+    print('Parameters currently in use:\n')
+    pprint(rfc.get_params())
+
+    scores(rfc, 'RFC', bbb.X_train_small, bbb.y_train_small, bbb.X_test_small, bbb.y_test_small)
+    confusion_scores(rfc, bbb.X_test_small, bbb.y_test_small, 'RFC', bbb.outdir, saveFig=bbb.saveFig)
+
+    # hypertuning for RFC
+    gsc, grid_result =  GridSearch_RFC(bbb.X_train_small, bbb.y_train_small
+        )
+    # apply
+    rfc_tuned = RandomForestRegressor(class_weight='balanced', **grid_result.best_params_)
+    rfc_tuned.fit(bbb.X_train_small, bbb.y_train_small)
+    scores(rfc_tuned, 'RFC Tuned', bbb.X_train_small, bbb.y_train_small, bbb.X_test_small, bbb.y_test_small)
+    confusion_scores(rfc_tuned, bbb.X_test_small, bbb.y_test_small, 'RFCtuned', bbb.outdir, saveFig=bbb.saveFig)
+    ROC(rfc_tuned, 'RFCTuned', bbb.X_test_small, bbb.y_test_small,
+        bbb.outdir, '', bbb.saveFig)
+
+    # run model on the test field
+    yyy_predict_rfc = rfc_tuned.predict(bbb.XXX)
+    print("number of plants in test field: ", yyy_predict_rfc.sum())
+    print("{:.2f}% of field", (yyy_predict_rfc.sum()/len(yyy_predict_rfc))*100)
 
 
 
