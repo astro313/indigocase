@@ -158,6 +158,7 @@ class CreateDFsML(object):
 
 
     def build_DF_testField(self, test_img1, test_img2, test_img3, test_img4,
+                           test_hsv_img=None,
                            verbose=False):
 
         ndviTest, badiiTest = self.ndviCalc(test_img1, test_img4, verbose)
@@ -168,6 +169,11 @@ class CreateDFsML(object):
         XXX['b3'] = test_img3[~badiiTest].flatten()
         XXX['b4'] = test_img4[~badiiTest].flatten()
         XXX['ndvi'] = ndviTest[~badiiTest].flatten()
+
+        if test_hsv_img is not None:
+            XXX['hueIm'] = test_hsv_img[:, :, 0][~badiiTest].flatten()
+            XXX['valueIm'] = test_hsv_img[:, :, 2][~badiiTest].flatten()
+
         cnames = XXX.columns.values
 
         # generate X for the test field
