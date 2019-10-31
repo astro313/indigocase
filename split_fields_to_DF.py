@@ -22,7 +22,7 @@ def rgb2hsv(rgbim, savedir='./', tag='', plothist=False, saveFig=False):
     return hsv_img
 
 
-def plothist_hsv(hsv_img):
+def plothist_hsv(hsv_img, savedir, saveFig, tag):
     hue_img = hsv_img[:, :, 0]
     value_img = hsv_img[:, :, 2]
 
