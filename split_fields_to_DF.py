@@ -15,7 +15,7 @@ from parser import Parser
 
 def rgb2hsv(rgbim, savedir='./', tag='', plothist=False, saveFig=False):
     from skimage.color import rgb2hsv
-    hsv_img = rgb2hsv(rgb_img)
+    hsv_img = rgb2hsv(rgbim)
 
     if plothist:
         plothist_hsv(hsv_img, savedir, saveFig, tag)
