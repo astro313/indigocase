@@ -101,6 +101,13 @@ class CreateDFsML(object):
         """
         The logic behind this is that healthy, growing, green vegetation must produce needed energy through photosynthesis. When plants are actively photosynthesizing, they reflect or scatter near-IR light. Absorption of these wavelengths would result in overheating and tissue damage. The visible portion of the spectrum is absorbed; however, a little more green light is reflected away, relative to blue and particularly red light.
 
+        https://earthobservatory.nasa.gov/features/MeasuringVegetation/measuring_vegetation_2.php
+
+         The pigment in plant leaves, chlorophyll, strongly absorbs visible light (from 0.4 to 0.7 µm)
+         for use in photosynthesis. The cell structure of the leaves, on the other hand,
+         strongly reflects near-infrared light (from 0.7 to 1.1 µm). The more leaves a plant has,
+         the more these wavelengths of light are affected, respectively.
+
         # other vegetation indices https://midopt.com/filters-for-ndvi/
 
         Parameters
@@ -145,16 +152,9 @@ class CreateDFsML(object):
 
         return ndvi, badii
 
-
-    def build_DF_trainField(self, train_img1, train_img2,
-                                  train_img3, train_img4,
-                            truthf, datasetTrain,
-                            train_hsv_img=None,
-                            verbose=False):
-
-        ndvi, badii = self.ndviCalc(train_img1, train_img4, verbose)
-        # build ytarget based on ground truth
-        ytarget = np.zeros_like(train_img1)
+    def bool_mask_truth(self, datasetTrain, truthf):
+        train_img1 = datasetTrain.read(1)
+        plant_bool = np.zeros_like(train_img1)
 
         import fiona
         with fiona.open(truthf, "r") as shfile:
@@ -164,8 +164,21 @@ class CreateDFsML(object):
             # get the x,y pix position of each plant pos
             py, px = datasetTrain.index(*i['coordinates'])
             # print('Pixel Y, X coords: {}, {}'.format(py, px))
-            ytarget[py, px] = 1.0
-        self.ytarget = ytarget[~badii].flatten().astype(int)
+            plant_bool[py, px] = 1.0
+        plant_bool = plant_bool.astype(int)
+        return plant_bool
+
+
+    def build_DF_trainField(self, train_img1, train_img2,
+                                  train_img3, train_img4,
+                            truthf, datasetTrain,
+                            train_hsv_img=None,
+                            verbose=False):
+
+        ndvi, badii = self.ndviCalc(train_img1, train_img4, verbose)
+        # build ytarget based on ground truth
+        plant_bool = bool_mask_truth(datasetTrain, truthf)
+        self.ytarget = plant_bool[~badii].flatten().astype(int)
 
         # build DF as X
         X_train = pd.DataFrame()
