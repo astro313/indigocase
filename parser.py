@@ -46,6 +46,7 @@ class Parser(object):
 
         self.saveFig = setupParam['misc']['saveFig']
         self.verbose = setupParam['misc']['verbose']
+        self.trainhue = setupParam['misc']['trainhue']
 
 
     def read_train_data(self):

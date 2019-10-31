@@ -50,12 +50,16 @@ def run(fname):
     bbb.outdir = bu.MLplotdir
     bbb.saveFig = bu.saveFig
 
-    # train also on RGB image, and Hue, and Value images
-    from split_fields_to_DF import create_rgb
-    train_RGB = create_rgb(bu.train_img1, bu.train_img3, bu.train_img4)
-    train_hsv_img = rgb2hsv(train_RGB, savedir=bu.plotdir, tag='train',
-                           plothist=True, saveFig=bu.saveFig)
-    del train_RGB
+    if bu.trainhue:
+        # train also on Hue image
+        from split_fields_to_DF import create_rgb
+        train_RGB = create_rgb(bu.train_img1, bu.train_img3, bu.train_img4)
+        train_hsv_img = rgb2hsv(train_RGB, savedir=bu.plotdir, tag='train',
+                               plothist=True, saveFig=bu.saveFig)
+        del train_RGB
+    else:
+        train_hsv_img = None
+
     bbb.build_DF_trainField(bu.train_img1, bu.train_img2,
                             bu.train_img3, bu.train_img4,
                             bu.truthfile, bu.datasetTrain,
@@ -64,9 +68,21 @@ def run(fname):
     del train_hsv_img
 
     bbb.split_data_for_ML()
+
+    # similarly for test
+    if bu.trainhue:
+        test_RGB = create_rgb(bu.test_img1, bu.test_img3, bu.test_img4)
+        test_hsv_img = rgb2hsv(test_RGB, savedir=bu.plotdir, tag='test',
+                               plothist=True, saveFig=bu.saveFig)
+        del test_RGB
+    else:
+        test_hsv_img = None
+
     bbb.build_DF_testField(bu.test_img1, bu.test_img2,
                            bu.test_img3, bu.test_img4,
+                           test_hsv_img,
                            bu.verbose)
+    del test_hsv_img
     del bu
 
     # ML pipeline

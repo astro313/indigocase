@@ -9,3 +9,4 @@ output:
 misc:
   saveFig: True
   verbose: False
+  trainhue: True     # whether or not to train on Hue image values
