@@ -73,7 +73,6 @@ class CreateDFsML(object):
         return CVI
 
 
-
     def ngCalc(self, red, green, nir, verbose):
         # normalized green
         NG = green / (nir + red + green)
@@ -175,9 +174,17 @@ class CreateDFsML(object):
                             train_hsv_img=None,
                             verbose=False):
 
-        ndvi, badii = self.ndviCalc(train_img1, train_img4, verbose)
         # build ytarget based on ground truth
         plant_bool = bool_mask_truth(datasetTrain, truthf)
+
+        # mask
+        badii = np.ones_like(plant_bool)
+
+        # if ndvi
+        if self.trainndvi:
+            ndvi, badii = self.ndviCalc(train_img1, train_img4, verbose)
+
+        # build ytarget
         self.ytarget = plant_bool[~badii].flatten().astype(int)
 
         # build DF as X
@@ -186,7 +193,9 @@ class CreateDFsML(object):
         X_train['b2'] = train_img2[~badii].flatten()
         X_train['b3'] = train_img3[~badii].flatten()
         X_train['b4'] = train_img4[~badii].flatten()
-        X_train['ndvi'] = ndvi[~badii].flatten()
+
+        if self.trainndvi:
+            X_train['ndvi'] = ndvi[~badii].flatten()
 
         if train_hsv_img is not None:
             X_train['hueIm'] = train_hsv_img[:, :, 0][~badii].flatten()
@@ -221,14 +230,19 @@ class CreateDFsML(object):
                            test_hsv_img=None,
                            verbose=False):
 
-        ndviTest, badiiTest = self.ndviCalc(test_img1, test_img4, verbose)
+        badiiTest = np.ones_like(test_img1)
+        if self.trainndvi:
+            ndviTest, badiiTest = self.ndviCalc(test_img1, test_img4, verbose)
+
         # build DF as X
         XXX = pd.DataFrame()
         XXX['b1'] = test_img1[~badiiTest].flatten()
         XXX['b2'] = test_img2[~badiiTest].flatten()
         XXX['b3'] = test_img3[~badiiTest].flatten()
         XXX['b4'] = test_img4[~badiiTest].flatten()
-        XXX['ndvi'] = ndviTest[~badiiTest].flatten()
+
+        if self.trainndvi:
+            XXX['ndvi'] = ndviTest[~badiiTest].flatten()
 
         if test_hsv_img is not None:
             XXX['hueIm'] = test_hsv_img[:, :, 0][~badiiTest].flatten()

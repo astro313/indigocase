@@ -45,10 +45,19 @@ def run(fname):
     overplot_truthPoints_trainField(bu.datasetTrain, bu.truth, bu.saveFig, \
                                     bu.plotdir, bu.train_xmin, bu.train_xmax, bu.train_ymin, bu.train_ymax)
 
-    # calc ndvi, create pd
+    # calc vegetation indices, create pd
     bbb = CreateDFsML(test_size=0.3)
     bbb.outdir = bu.MLplotdir
     bbb.saveFig = bu.saveFig
+
+    bbb.trainndvi = bu.trainndvi
+    bbb.trainendvi = bu.trainendvi
+    bbb.traincvi = bu.traincvi
+    bbb.trainng = bu.trainng
+
+    bbb.trainnnir =  bu.trainnnir
+    bbb.trainnr = bu.trainnr
+    bbb.traintvi = bu.traintvi
 
     if bu.trainhue:
         # train also on Hue image
