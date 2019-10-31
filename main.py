@@ -25,7 +25,7 @@ from sklearn.linear_model import LogisticRegression
 from MLutils import scores, GridSearch_logreg, ROC, confusion_scores, GridSearch_SVMpoly, GridSearch_RFC
 
 
-def run(fname):
+def run_ML_pipeline(fname):
 
     bu = Parser(fname)
     _ = compute_tif_summaryStats(bu.datasetTrain)
@@ -50,11 +50,13 @@ def run(fname):
     bbb.outdir = bu.MLplotdir
     bbb.saveFig = bu.saveFig
 
+    bbb.logreg = bu.logreg
+    bbb.SVM = bu.SVM
+    bbb.RFC = bu.RFC
     bbb.trainndvi = bu.trainndvi
     bbb.trainendvi = bu.trainendvi
     bbb.traincvi = bu.traincvi
     bbb.trainng = bu.trainng
-
     bbb.trainnnir =  bu.trainnnir
     bbb.trainnr = bu.trainnr
     bbb.traintvi = bu.traintvi
@@ -95,111 +97,114 @@ def run(fname):
     del bu
 
     # ML pipeline
-    ## 0 and 1, so start w/ logistic
-    logreg = LogisticRegression(penalty='l2', class_weight='balanced')
-    logreg.fit(bbb.X_train_small, bbb.y_train_small)
-    scores(logreg, 'Logistic Regression', bbb.X_train_small, bbb.y_train_small, bbb.X_test_small, bbb.y_test_small)
-    confusion_scores(logreg, bbb.X_test_small, bbb.y_test_small, 'logreg', bbb.outdir, saveFig=bbb.saveFig)
-    ROC(logreg, 'LogisticRegression', bbb.X_test_small, bbb.y_test_small,
-        bbb.outdir, '', bbb.saveFig)
+    if bbb.logreg:
+        ## 0 and 1, so start w/ logistic
+        logreg = LogisticRegression(penalty='l2', class_weight='balanced')
+        logreg.fit(bbb.X_train_small, bbb.y_train_small)
+        scores(logreg, 'Logistic Regression', bbb.X_train_small, bbb.y_train_small, bbb.X_test_small, bbb.y_test_small)
+        confusion_scores(logreg, bbb.X_test_small, bbb.y_test_small, 'logreg', bbb.outdir, saveFig=bbb.saveFig)
+        ROC(logreg, 'LogisticRegression', bbb.X_test_small, bbb.y_test_small,
+            bbb.outdir, '', bbb.saveFig)
 
-    # hyperparameter Tuning
-    gsc, grid_result = GridSearch_logreg(bbb.X_train_small, bbb.y_train_small
-        )
-    # apply
-    logreg_tuned = LogisticRegression(penalty='l2', class_weight='balanced', **grid_result.best_params_)
-    logreg_tuned.fit(bbb.X_train_small, bbb.y_train_small)
-    scores(logreg_tuned, 'Logistic Regression, Tuned', bbb.X_train_small, bbb.y_train_small, bbb.X_test_small, bbb.y_test_small)
-    confusion_scores(logreg_tuned, bbb.X_test_small, bbb.y_test_small, 'logregtuned', bbb.outdir, saveFig=bbb.saveFig)
-    ROC(logreg_tuned, 'LogisticRegressionTuned', bbb.X_test_small, bbb.y_test_small, bbb.outdir, '', bbb.saveFig)
+        # hyperparameter Tuning
+        gsc, grid_result = GridSearch_logreg(bbb.X_train_small, bbb.y_train_small
+            )
+        # apply
+        logreg_tuned = LogisticRegression(penalty='l2', class_weight='balanced', **grid_result.best_params_)
+        logreg_tuned.fit(bbb.X_train_small, bbb.y_train_small)
+        scores(logreg_tuned, 'Logistic Regression, Tuned', bbb.X_train_small, bbb.y_train_small, bbb.X_test_small, bbb.y_test_small)
+        confusion_scores(logreg_tuned, bbb.X_test_small, bbb.y_test_small, 'logregtuned', bbb.outdir, saveFig=bbb.saveFig)
+        ROC(logreg_tuned, 'LogisticRegressionTuned', bbb.X_test_small, bbb.y_test_small, bbb.outdir, '', bbb.saveFig)
 
-    # run model on the test field
-    yyy_predict_logreg = logreg_tuned.predict(bbb.XXX)
-    print("number of plants in test field: ", yyy_predict_logreg.sum())
-    print("{:.2f}% of field", (yyy_predict_logreg.sum()/len(yyy_predict_logreg))*100)
-
-
-    # SVM
-    from sklearn.svm import SVC
-
-    SVM = SVC(kernel='linear', class_weight='balanced')
-    SVM.fit(bbb.X_train_small, bbb.y_train_small)
-    scores(SVM, 'SVM linear', bbb.X_train_small, bbb.y_train_small, bbb.X_test_small, bbb.y_test_small)
-    confusion_scores(SVM, bbb.X_test_small, bbb.y_test_small, 'SVM linear', bbb.outdir, saveFig=bbb.saveFig)
-
-    # SVM poly
-    SVM = SVC(kernel='poly', class_weight='balanced')
-    SVM.fit(bbb.X_train_small, bbb.y_train_small)
-    scores(SVM, 'SVM poly', bbb.X_train_small, bbb.y_train_small, bbb.X_test_small, bbb.y_test_small)
-    confusion_scores(SVM, bbb.X_test_small, bbb.y_test_small, 'SVM poly', bbb.outdir, saveFig=bbb.saveFig)
-
-    # hypertuning for poly
-    gsc, grid_result =  GridSearch_SVMpoly(bbb.X_train_small, bbb.y_train_small
-        )
-    # apply
-    SVMpoly_tuned = SVC(kernel='poly', class_weight='balanced', **grid_result.best_params_)
-    SVMpoly_tuned.fit(bbb.X_train_small, bbb.y_train_small)
-    scores(SVMpoly_tuned, 'SVM poly, Tuned', bbb.X_train_small, bbb.y_train_small, bbb.X_test_small, bbb.y_test_small)
-    confusion_scores(SVMpoly_tuned, bbb.X_test_small, bbb.y_test_small, 'SVMpolytuned', bbb.outdir, saveFig=bbb.saveFig)
-    ROC(SVMpoly_tuned, 'SVMpolyTuned', bbb.X_test_small, bbb.y_test_small,
-        bbb.outdir, '', bbb.saveFig)
-
-    # run model on the test field
-    yyy_predict_poly = SVMpoly_tuned.predict(bbb.XXX)
-    print("number of plants in test field: ", yyy_predict_poly.sum())
-    print("{:.2f}% of field", (yyy_predict_poly.sum()/len(yyy_predict_poly))*100)
+        # run model on the test field
+        yyy_predict_logreg = logreg_tuned.predict(bbb.XXX)
+        print("number of plants in test field: ", yyy_predict_logreg.sum())
+        print("{:.2f}% of field", (yyy_predict_logreg.sum()/len(yyy_predict_logreg))*100)
 
 
-    # SVM rbf
-    SVM = SVC(kernel='rbf', class_weight='balanced')
-    SVM.fit(bbb.X_train_small, bbb.y_train_small)
-    scores(SVM, 'SVM rbf', bbb.X_train_small, bbb.y_train_small, bbb.X_test_small, bbb.y_test_small)
-    confusion_scores(SVM, bbb.X_test_small, bbb.y_test_small, 'SVM rbf', bbb.outdir, saveFig=bbb.saveFig)
+    if bbb.SVM:
+        # SVM
+        from sklearn.svm import SVC
 
-    # hypertuning for rbf
-    gsc, grid_result =  GridSearch_SVMrbf(bbb.X_train_small, bbb.y_train_small
-        )
-    # apply
-    SVMrbf_tuned = SVC(kernel='rbf', class_weight='balanced', **grid_result.best_params_)
-    SVMrbf_tuned.fit(bbb.X_train_small, bbb.y_train_small)
-    scores(SVMrbf_tuned, 'SVM rbf, Tuned', bbb.X_train_small, bbb.y_train_small, bbb.X_test_small, bbb.y_test_small)
-    confusion_scores(SVMrbf_tuned, bbb.X_test_small, bbb.y_test_small, 'SVMrbftuned', bbb.outdir, saveFig=bbb.saveFig)
-    ROC(SVMrbf_tuned, 'SVMrbfTuned', bbb.X_test_small, bbb.y_test_small,
-        bbb.outdir, '', bbb.saveFig)
+        SVM = SVC(kernel='linear', class_weight='balanced')
+        SVM.fit(bbb.X_train_small, bbb.y_train_small)
+        scores(SVM, 'SVM linear', bbb.X_train_small, bbb.y_train_small, bbb.X_test_small, bbb.y_test_small)
+        confusion_scores(SVM, bbb.X_test_small, bbb.y_test_small, 'SVM linear', bbb.outdir, saveFig=bbb.saveFig)
 
-    # run model on the test field
-    yyy_predict_rbf = SVMrbf_tuned.predict(bbb.XXX)
-    print("number of plants in test field: ", yyy_predict_rbf.sum())
-    print("{:.2f}% of field", (yyy_predict_rbf.sum()/len(yyy_predict_rbf))*100)
+        # SVM poly
+        SVM = SVC(kernel='poly', class_weight='balanced')
+        SVM.fit(bbb.X_train_small, bbb.y_train_small)
+        scores(SVM, 'SVM poly', bbb.X_train_small, bbb.y_train_small, bbb.X_test_small, bbb.y_test_small)
+        confusion_scores(SVM, bbb.X_test_small, bbb.y_test_small, 'SVM poly', bbb.outdir, saveFig=bbb.saveFig)
+
+        # hypertuning for poly
+        gsc, grid_result =  GridSearch_SVMpoly(bbb.X_train_small, bbb.y_train_small
+            )
+        # apply
+        SVMpoly_tuned = SVC(kernel='poly', class_weight='balanced', **grid_result.best_params_)
+        SVMpoly_tuned.fit(bbb.X_train_small, bbb.y_train_small)
+        scores(SVMpoly_tuned, 'SVM poly, Tuned', bbb.X_train_small, bbb.y_train_small, bbb.X_test_small, bbb.y_test_small)
+        confusion_scores(SVMpoly_tuned, bbb.X_test_small, bbb.y_test_small, 'SVMpolytuned', bbb.outdir, saveFig=bbb.saveFig)
+        ROC(SVMpoly_tuned, 'SVMpolyTuned', bbb.X_test_small, bbb.y_test_small,
+            bbb.outdir, '', bbb.saveFig)
+
+        # run model on the test field
+        yyy_predict_poly = SVMpoly_tuned.predict(bbb.XXX)
+        print("number of plants in test field: ", yyy_predict_poly.sum())
+        print("{:.2f}% of field", (yyy_predict_poly.sum()/len(yyy_predict_poly))*100)
 
 
-    ### RFC
-    rfc = RandomForestClassifier(class_weight='balanced')
-    rfc.fit(X_train_small,y_train_small)
+        # SVM rbf
+        SVM = SVC(kernel='rbf', class_weight='balanced')
+        SVM.fit(bbb.X_train_small, bbb.y_train_small)
+        scores(SVM, 'SVM rbf', bbb.X_train_small, bbb.y_train_small, bbb.X_test_small, bbb.y_test_small)
+        confusion_scores(SVM, bbb.X_test_small, bbb.y_test_small, 'SVM rbf', bbb.outdir, saveFig=bbb.saveFig)
 
-    # Look at parameters used by our current forest
-    from pprint import pprint
-    print('Parameters currently in use:\n')
-    pprint(rfc.get_params())
+        # hypertuning for rbf
+        gsc, grid_result =  GridSearch_SVMrbf(bbb.X_train_small, bbb.y_train_small
+            )
+        # apply
+        SVMrbf_tuned = SVC(kernel='rbf', class_weight='balanced', **grid_result.best_params_)
+        SVMrbf_tuned.fit(bbb.X_train_small, bbb.y_train_small)
+        scores(SVMrbf_tuned, 'SVM rbf, Tuned', bbb.X_train_small, bbb.y_train_small, bbb.X_test_small, bbb.y_test_small)
+        confusion_scores(SVMrbf_tuned, bbb.X_test_small, bbb.y_test_small, 'SVMrbftuned', bbb.outdir, saveFig=bbb.saveFig)
+        ROC(SVMrbf_tuned, 'SVMrbfTuned', bbb.X_test_small, bbb.y_test_small,
+            bbb.outdir, '', bbb.saveFig)
 
-    scores(rfc, 'RFC', bbb.X_train_small, bbb.y_train_small, bbb.X_test_small, bbb.y_test_small)
-    confusion_scores(rfc, bbb.X_test_small, bbb.y_test_small, 'RFC', bbb.outdir, saveFig=bbb.saveFig)
+        # run model on the test field
+        yyy_predict_rbf = SVMrbf_tuned.predict(bbb.XXX)
+        print("number of plants in test field: ", yyy_predict_rbf.sum())
+        print("{:.2f}% of field", (yyy_predict_rbf.sum()/len(yyy_predict_rbf))*100)
 
-    # hypertuning for RFC
-    gsc, grid_result =  GridSearch_RFC(bbb.X_train_small, bbb.y_train_small
-        )
-    # apply
-    rfc_tuned = RandomForestRegressor(class_weight='balanced', **grid_result.best_params_)
-    rfc_tuned.fit(bbb.X_train_small, bbb.y_train_small)
-    scores(rfc_tuned, 'RFC Tuned', bbb.X_train_small, bbb.y_train_small, bbb.X_test_small, bbb.y_test_small)
-    confusion_scores(rfc_tuned, bbb.X_test_small, bbb.y_test_small, 'RFCtuned', bbb.outdir, saveFig=bbb.saveFig)
-    ROC(rfc_tuned, 'RFCTuned', bbb.X_test_small, bbb.y_test_small,
-        bbb.outdir, '', bbb.saveFig)
 
-    # run model on the test field
-    yyy_predict_rfc = rfc_tuned.predict(bbb.XXX)
-    print("number of plants in test field: ", yyy_predict_rfc.sum())
-    print("{:.2f}% of field", (yyy_predict_rfc.sum()/len(yyy_predict_rfc))*100)
+    if bbb.RFC:
+        ### RFC
+        rfc = RandomForestClassifier(class_weight='balanced')
+        rfc.fit(X_train_small,y_train_small)
+
+        # Look at parameters used by our current forest
+        from pprint import pprint
+        print('Parameters currently in use:\n')
+        pprint(rfc.get_params())
+
+        scores(rfc, 'RFC', bbb.X_train_small, bbb.y_train_small, bbb.X_test_small, bbb.y_test_small)
+        confusion_scores(rfc, bbb.X_test_small, bbb.y_test_small, 'RFC', bbb.outdir, saveFig=bbb.saveFig)
+
+        # hypertuning for RFC
+        gsc, grid_result =  GridSearch_RFC(bbb.X_train_small, bbb.y_train_small
+            )
+        # apply
+        rfc_tuned = RandomForestRegressor(class_weight='balanced', **grid_result.best_params_)
+        rfc_tuned.fit(bbb.X_train_small, bbb.y_train_small)
+        scores(rfc_tuned, 'RFC Tuned', bbb.X_train_small, bbb.y_train_small, bbb.X_test_small, bbb.y_test_small)
+        confusion_scores(rfc_tuned, bbb.X_test_small, bbb.y_test_small, 'RFCtuned', bbb.outdir, saveFig=bbb.saveFig)
+        ROC(rfc_tuned, 'RFCTuned', bbb.X_test_small, bbb.y_test_small,
+            bbb.outdir, '', bbb.saveFig)
+
+        # run model on the test field
+        yyy_predict_rfc = rfc_tuned.predict(bbb.XXX)
+        print("number of plants in test field: ", yyy_predict_rfc.sum())
+        print("{:.2f}% of field", (yyy_predict_rfc.sum()/len(yyy_predict_rfc))*100)
 
 
 
@@ -210,7 +215,7 @@ if __name__ == "__main__":
     except:
         fname = 'config.yaml'
 
-    run(fname)
+    run_ML_pipeline(fname)
 
 
 
