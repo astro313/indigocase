@@ -13,6 +13,13 @@ import os
 from parser import Parser
 import matplotlib.pyplot as plt
 
+
+def create_rgb(r, g, b, stretch=0.5):
+    from astropy.visualization import make_lupton_rgb
+    image = make_lupton_rgb(r, g, b, stretch=stretch)
+    return image
+
+
 def rgb2hsv(rgbim, savedir='./', tag='', plothist=False, saveFig=False):
     from skimage.color import rgb2hsv
     hsv_img = rgb2hsv(rgbim)
@@ -95,7 +102,6 @@ class CreateDFsML(object):
     def build_DF_trainField(self, train_img1, train_img2,
                                   train_img3, train_img4,
                             truthf, datasetTrain,
-                            train_RGB=None,
                             train_hsv_img=None,
                             verbose=False):
 
@@ -122,12 +128,9 @@ class CreateDFsML(object):
         X_train['b4'] = train_img4[~badii].flatten()
         X_train['ndvi'] = ndvi[~badii].flatten()
 
-        if train_RGB is not None:
-            X_train['RGB'] = train_RGB[~badii].flatten()
-
         if train_hsv_img is not None:
-            X_train['hueIm'] = hsv_img[:, :, 0][~badii].flatten()
-            X_train['valueIm'] = hsv_img[:, :, 2][~badii].flatten()
+            X_train['hueIm'] = train_hsv_img[:, :, 0][~badii].flatten()
+            X_train['valueIm'] = train_hsv_img[:, :, 2][~badii].flatten()
 
         cnames = X_train.columns.values
 
