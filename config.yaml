@@ -6,9 +6,10 @@ input:
 output:
   plotdir: 'plotField/'
   MLplotdir: 'plotML/'
-misc:
-  saveFig: True
-  verbose: False
+ML:
+  logreg: True
+  SVM: False
+  RFC: False
   trainndvi: True    # should be always true
   trainhue: True     # whether or not to train on Hue image values
   trainendvi: True    # whether or not to train on ENDVI
@@ -17,3 +18,6 @@ misc:
   trainnnir: True
   trainnr: True
   traintvi: True
+misc:
+  saveFig: True
+  verbose: False
