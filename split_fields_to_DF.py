@@ -175,7 +175,7 @@ class CreateDFsML(object):
                             verbose=False):
 
         # build ytarget based on ground truth
-        plant_bool = bool_mask_truth(datasetTrain, truthf)
+        plant_bool = self.bool_mask_truth(datasetTrain, truthf)
 
         # mask
         badii = np.ones_like(plant_bool)
