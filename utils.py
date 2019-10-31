@@ -96,13 +96,27 @@ def get_geo_from_tif(tifname, verbose=True):
 def pixel2coord(geo_transform, x, y):
     """
     Returns global coordinates from pixel x, y coords
+
+    Parameters
+    ----------
+    geo_transform:
+        containing tif geo_transform info
+    x: int
+        position of pixel in x-dir
+    y: int
+        position of pixel in y-dir
+
+    Returns
+    -------
+    xp, yp: floats
+        coordinates corresponding to pixel
+
     """
     xoff, a, b, yoff, d, e = geo_transform
 
     xp = a * x + b * y + xoff
     yp = d * x + e * y + yoff
     return (xp, yp)
-
 
 
 def get_latlon_axeslab(geo_transform, x, y):
