@@ -53,8 +53,55 @@ class CreateDFsML(object):
         self.outdir = './'
 
 
+    def endviCalc(self, green, blue, nir, verbose):
+        """
+        https://www.dronezon.com/learn-about-drones-quadcopters/multispectral-sensor-drones-in-farming-yield-big-benefits/
+
+        Blue+Green+Near-IR Extended Normalized Difference Vegetation Index (ENDVI) data gathered for vegetative health monitoring can be used to provide similar, but spectrally different information as compared to traditional NDVI data. Soil background, differing atmospheric conditions and various types of vegetation can all influence the reflection of visible light somewhat differently. ENDVI analysis may, at times, be able to impart more accurate or reliable information regarding plant or crop health by additional leveraging of information in the blue portion of the spectrum. The formula used is:
+        """
+
+        return ((nir + green) - (2 * blue)) / ((nir + green) + (2 * blue))
+
+
+    def cviCalc(self, red, green, nir, verbose):
+        """
+
+        Chlorophyll Vegetation Index (CVI)
+
+        """
+        CVI = (nir * red) / (green**2)
+        return CVI
+
+
+
+    def ngCalc(self, red, green, nir, verbose):
+        # normalized green
+        NG = green / (nir + red + green)
+        return NG
+
+
+    def nnirCalc(self, red, green, nir, verbose):
+        # noralized red
+        NNIR = nir / (nir + red + green)
+        return NNIR
+
+
+    def nrCalc(self, red, green, nir, verbose):
+        # noralized red
+        NR = red / (nir + red + green)
+        return NR
+
+
+    def tviCalc(self, nir, green, verbose):
+        TVI = 0.5 * (120 * (nir - green) - 200 * (red - green))
+        return TVI
+
+
     def ndviCalc(self, red, nir, verbose):
         """
+        The logic behind this is that healthy, growing, green vegetation must produce needed energy through photosynthesis. When plants are actively photosynthesizing, they reflect or scatter near-IR light. Absorption of these wavelengths would result in overheating and tissue damage. The visible portion of the spectrum is absorbed; however, a little more green light is reflected away, relative to blue and particularly red light.
+
+        # other vegetation indices https://midopt.com/filters-for-ndvi/
 
         Parameters
         ----------
