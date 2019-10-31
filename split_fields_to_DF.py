@@ -11,7 +11,7 @@ from rasterio.plot import show
 from shapely.geometry import shape
 import os
 from parser import Parser
-
+import matplotlib.pyplot as plt
 
 def rgb2hsv(rgbim, savedir='./', tag='', plothist=False, saveFig=False):
     from skimage.color import rgb2hsv
