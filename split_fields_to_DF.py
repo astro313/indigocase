@@ -12,11 +12,39 @@ from shapely.geometry import shape
 import os
 from parser import Parser
 
+
+def rgb2hsv(rgbim, savedir='./', tag='', plothist=False, saveFig=False):
+    from skimage.color import rgb2hsv
+    hsv_img = rgb2hsv(rgb_img)
+
+    if plothist:
+        plothist_hsv(hsv_img, savedir, saveFig, tag)
+    return hsv_img
+
+
+def plothist_hsv(hsv_img):
+    hue_img = hsv_img[:, :, 0]
+    value_img = hsv_img[:, :, 2]
+
+    fig, ax = plt.subplots()
+
+    ax.hist(hue_img.ravel(), 512)
+    ax.set_title("Histogram of the Hue channel")
+
+    if saveFig:
+        if tag != '':
+            tag += '_'
+        plt.savefig(savedir + tag + 'hue_channel.png', bbox_inches='tight')
+    else:
+        plt.show()
+
+
 class CreateDFsML(object):
     def __init__(self, test_size):
         self.test_size=0.3
         self.saveFig = False
         self.outdir = './'
+
 
     def ndviCalc(self, red, nir, verbose):
         """
@@ -66,7 +94,10 @@ class CreateDFsML(object):
 
     def build_DF_trainField(self, train_img1, train_img2,
                                   train_img3, train_img4,
-                            truthf, datasetTrain, verbose=False):
+                            truthf, datasetTrain,
+                            train_RGB=None,
+                            train_hsv_img=None,
+                            verbose=False):
 
         ndvi, badii = self.ndviCalc(train_img1, train_img4, verbose)
         # build ytarget based on ground truth
@@ -90,6 +121,14 @@ class CreateDFsML(object):
         X_train['b3'] = train_img3[~badii].flatten()
         X_train['b4'] = train_img4[~badii].flatten()
         X_train['ndvi'] = ndvi[~badii].flatten()
+
+        if train_RGB is not None:
+            X_train['RGB'] = train_RGB[~badii].flatten()
+
+        if train_hsv_img is not None:
+            X_train['hueIm'] = hsv_img[:, :, 0][~badii].flatten()
+            X_train['valueIm'] = hsv_img[:, :, 2][~badii].flatten()
+
         cnames = X_train.columns.values
 
         scaler = MinMaxScaler()
