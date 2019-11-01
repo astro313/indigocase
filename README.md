@@ -18,8 +18,7 @@ Using ground truth, I first wrote a pipeline to label which positions (or set of
         * `config.py`
         * `MLutils.py`
 
-From the logistic regressor, which has a balanced accuracy of 97%, we find xxx plants in the test field.
-
+From the logistic regressor, which has a balanced accuracy of 97%, we **find 643754** plants in the test field, corresponding to ~2% of the total number of pixels. Adding hue image didn't improve results.
     
 ## Motivation to use each of the channel value as the input: plants probably have different spectral properties than the rest of the whatever objects are in the satellite images.
 ![](Vegation-Multispectral-Bands-Green-Red-Red-Edge-NIR.jpg)
@@ -60,6 +59,7 @@ Codes to make the plants population map [# of plants per acer]:
 Issues and challenges that I faced: 
 - I may have approached this problem the wrong way than I should have in the beginning.. Perhaps I should have do image segmentation and then compare to the ground truth, instead of deploying a ML pipeline?
 - domain knowledge missing and took me a while to understand the satellite images and the geosystem of the TIF file
+- Just looking at the band images, the RGB composite, and ndvi image. Nothing stands out as a plant to me. Even when applying thresholds to the ndvi image, I am still uncertain how to wrap my head around a plant in these images.
 - based on the latitude and longtiude of the training field, it seems like the area of the map is ~50 x 50 m^2, which seems too small, but it was not clear to me where I would have messed up. 
 - Because of this reason, I don't have a sensible plant population map, but the code I have written in `plant_analytics.py` is expected to still work with sensible inputs.
 - I am still uncertain about how to determine the "plant size" from the satellite image. Is it the extent of a given connected region spanned by plants? But even when overlaying the ground truth on the train field image, it's not very clear to me what plant size means.
