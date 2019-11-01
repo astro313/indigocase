@@ -1,6 +1,7 @@
 import numpy as np
 from math import *
 
+
 def normalize(array):
     array_min, array_max = array.min(), array.max()
     return (array - array_min) / (array_max - array_min)
@@ -124,9 +125,10 @@ def get_latlon_axeslab(geo_transform, x, y):
     return lat, lon0
 
 
-def get_raster_extents_from_tif(gt, ds):
+def get_raster_extents_from_tif(gt):
     width = ds.RasterXSize
     height = ds.RasterYSize
+    gt = ds.GetGeoTransform()
 
     print('Upper Left Corner:', gdal.ApplyGeoTransform(gt, 0, 0))
     print('Upper Right Corner:', gdal.ApplyGeoTransform(gt, width, 0))
@@ -155,3 +157,26 @@ def dist_btw_pair_latlon(lon0, lat0, lon1, lat1):
     return d
 
 
+def get_m_per_px(xxxrange_m, yyyrange_m, cols, rows):
+    """
+    Get meters per pixel
+
+    Parameters
+    ----------
+    xxxrange_m, yyyrange_m: float
+        range spanned in meter
+
+    cols, rows: int
+        number of cols and rows
+
+    Returns
+    -------
+    mPerPixX, mPerPixY: float
+        how big each pixel is in meter
+
+    """
+    # for small lat range
+    mPerPixX = xxxrange_m / cols
+    mPerPixY = yyyrange_m / rows
+
+    return mPerPixX, mPerPixY
