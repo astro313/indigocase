@@ -184,6 +184,9 @@ class CreateDFsML(object):
         if self.trainndvi:
             ndvi, badii = self.ndviCalc(train_img1, train_img4, verbose)
 
+        if self.trainendvi:
+            endvi = self.endviCalc(train_img2, train_img3, train_img4, verbose)
+
         # build ytarget
         self.ytarget = plant_bool[~badii].flatten().astype(int)
 
@@ -200,6 +203,9 @@ class CreateDFsML(object):
         if train_hsv_img is not None:
             X_train['hueIm'] = train_hsv_img[:, :, 0][~badii].flatten()
             X_train['valueIm'] = train_hsv_img[:, :, 2][~badii].flatten()
+
+        if self.trainendvi:
+            X_train['endvi'] = endvi[~badii].flatten()
 
         cnames = X_train.columns.values
 

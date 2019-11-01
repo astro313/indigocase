@@ -11,13 +11,13 @@ ML:
   SVM: False
   RFC: False
   trainndvi: True    # should be always true
-  trainhue: True     # whether or not to train on Hue image values
+  trainhue: False     # whether or not to train on Hue image values
   trainendvi: True    # whether or not to train on ENDVI
-  traincvi: True    # whether or not to train on CVI
-  trainng: True    # whether or not to train on NG
-  trainnnir: True
-  trainnr: True
-  traintvi: True
+  traincvi: False    # whether or not to train on CVI
+  trainng: False    # whether or not to train on NG
+  trainnnir: False
+  trainnr: False
+  traintvi: False
 misc:
   saveFig: True
   verbose: False
