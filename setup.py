@@ -1,6 +1,7 @@
 from setuptools import setup
 from glob import glob
 from setuptools import find_packages
+from os.path import *
 
 setup(name='indigocase',
       version='1.0',
