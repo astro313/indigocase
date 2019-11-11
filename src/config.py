@@ -16,5 +16,5 @@ class Configurable(object):
 
 
 if __name__ == '__main__':
-    testC = Configurable('config.yaml')
+    testC = Configurable('../config.yaml')
     print(testC.config_dict)

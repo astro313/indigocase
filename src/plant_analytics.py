@@ -93,7 +93,7 @@ if __name__ == '__main__':
     try:
         fname = sys.argv[1]
     except:
-        fname = 'config.yaml'
+        fname = '../config.yaml'
 
 
     bu = Parser(fname)
