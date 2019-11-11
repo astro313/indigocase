@@ -240,6 +240,9 @@ class CreateDFsML(object):
         if self.trainndvi:
             ndviTest, badiiTest = self.ndviCalc(test_img1, test_img4, verbose)
 
+        if self.trainendvi:
+            endvi = self.endviCalc(train_img2, train_img3, train_img4, verbose)
+
         # build DF as X
         XXX = pd.DataFrame()
         XXX['b1'] = test_img1[~badiiTest].flatten()
@@ -253,6 +256,9 @@ class CreateDFsML(object):
         if test_hsv_img is not None:
             XXX['hueIm'] = test_hsv_img[:, :, 0][~badiiTest].flatten()
             XXX['valueIm'] = test_hsv_img[:, :, 2][~badiiTest].flatten()
+
+        if self.trainendvi:
+            X_train['endvi'] = endvi[~badiiTest].flatten()
 
         cnames = XXX.columns.values
 
