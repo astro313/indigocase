@@ -2,7 +2,7 @@ import os
 
 class Configurable(object):
 
-    def __init__(self, config, **kwargs):
+    def __init__(self, config='../config.yaml', **kwargs):
         import yaml
 
         if os.path.isfile(config):
@@ -16,5 +16,5 @@ class Configurable(object):
 
 
 if __name__ == '__main__':
-    testC = Configurable('../config.yaml')
+    testC = Configurable()
     print(testC.config_dict)

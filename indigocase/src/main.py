@@ -210,11 +210,7 @@ def run_ML_pipeline(fname):
 
 if __name__ == "__main__":
 
-    try:
-        fname = sys.argv[1]
-    except:
-        fname = '../config.yaml'
-
+    fname = '../config.yaml'
     run_ML_pipeline(fname)
 
 

@@ -3,9 +3,9 @@ from indigocase.src.config import Configurable
 import os
 
 
-def test_yaml_input_fields(yfname='config.yaml'):
+def test_yaml_input_fields():
 
-    ccc = Configurable(yfname)
+    ccc = Configurable()
     setupParam = ccc.config_dict
 
     dpath = setupParam['input']['dataPath']
