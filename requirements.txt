@@ -8,7 +8,7 @@ matplotlib==3.1.1
 numpy==1.17.3
 pandas==0.24.2
 pysal==2.1.0
-PyYAML==3.13
+PyYAML==5.1
 rasterio==1.1.0
 rasterstats==0.13.1
 scikit-image==0.16.2
