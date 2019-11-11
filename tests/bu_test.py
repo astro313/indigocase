@@ -1,2 +1,2 @@
-from Indigo_Oct.src.parser import Parser
-from Indigo_Oct.src.config import Configurable
+from indigocase.src.parser import Parser
+from indigocase.src.config import Configurable
