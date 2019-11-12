@@ -1,2 +1,6 @@
 # exclude data
+indigocase/data/
 data/
+*.pyc
+*.pyo
+.DS_Store
