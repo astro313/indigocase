@@ -1,4 +1,4 @@
-## Case study
+## Case study for Indigo [![Build Status](https://travis-ci.org/astro313/indigocase.svg?branch=master)](https://travis-ci.org/astro313/indigocase)
 
 ### Part 1: ML model
 Using ground truth, I first wrote a pipeline to label which positions (or set of pixel values) does a plant correspond to - or equivalently, which pixel of the trainning is a plant. Then I train ML classifers on the trainning field. The features of the pixel values of the 4 bands, NDVI, and optionally, the RGB calculated using R + B + NIR channels, and the hue (and other vegetation indices listed in config.yaml). Then, I use the ML models to determine the number of plants in the unseen test field. Howeever, this assumes that we always have information on the ground truth. 
