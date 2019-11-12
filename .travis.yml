@@ -23,6 +23,6 @@ install:
   - pip install -e .
   - conda install GDAL=2.3.3
   - "curl -L 'https://github.com/libspatialindex/libspatialindex/archive/1.8.5.tar.gz' | tar -xz"
-  - psuhd libspatialindex-1.8.5 && ./autogen.sh && ./configure && sudo make && sudo make install && sudo ldconfig && popd
+  - pushd libspatialindex-1.8.5 && ./autogen.sh && ./configure && sudo make && sudo make install && sudo ldconfig && popd
 script:
   - pytest
